@@ -44,6 +44,7 @@ namespace BoysheO.Nuget.Editor
         private static readonly string[] NetVerOrder =
         {
             "netstandard2.0",
+            "netstandard1.3",
             "netcoreapp3.1",
         };
 
