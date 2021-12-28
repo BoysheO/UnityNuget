@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -41,18 +42,28 @@ namespace BoysheO.Nuget.Editor
         private static readonly Regex _getIdAndVerFromFolderNameRegex =
             new Regex(@"^(?<Id>[a-zA-Z0-9.]+).(?<Ver>[0-9]+.[0-9]+.[0-9]+)$", RegexOptions.Compiled);
 
-        private static readonly string[] NetVerOrder =
+        /// <summary>
+        /// tell UnityNuget select which net version package has
+        /// </summary>
+        private static readonly string[] NetVerOrder = new string[]
         {
             "netstandard2.0",
+            "netstandard1.6",
+            "netstandard1.5",
+            "netstandard1.4",
             "netstandard1.3",
-            "netcoreapp3.1",
+            "netstandard1.2",
+            "netstandard1.1",
+            "netstandard1.0",
+            "netstandard2.1",
+            "netstandard2.1",
         };
 
         private static string PackagesInstallationFolder => Application.dataPath + "/Plugins/Nuget/";
 
         private static XDocument LoadPackagesConfig()
         {
-            var path = Application.dataPath + "/../" + "packages.config";
+            var path = Application.dataPath + "/../packages.config";
             var xml = XDocument.Load(path);
             return xml;
         }
@@ -60,10 +71,10 @@ namespace BoysheO.Nuget.Editor
         private static IEnumerable<PckInf> AsPackageInfoEnumerable(this XDocument xmlDoc)
         {
             return xmlDoc.Root!.Elements()
-                .Select(e => new PckInf
+                .Select(e => new PckInf()
                 {
-                    Id = e.Attribute("id")!.Value,
-                    Version = e.Attribute("version")!.Value,
+                    Id = e.Attribute("id").Value,
+                    Version = e.Attribute("version").Value,
                 });
         }
 
@@ -84,7 +95,7 @@ namespace BoysheO.Nuget.Editor
                     {
                         Id = v.Id,
                         Ver = v.Version,
-                        Folder = $"{GetAppPath()}/Packages/{v.Id}.{v.Version}"
+                        Folder = string.Format("{0}/Packages/{1}.{2}", GetAppPath(), v.Id, v.Version)
                     })
                     .Where(v => Directory.Exists(v.Folder));
                 return packageCache;
@@ -105,7 +116,7 @@ namespace BoysheO.Nuget.Editor
                             try
                             {
                                 var match = _getIdAndVerFromFolderNameRegex.Match(dirName);
-                                return new PckInstalled
+                                return new PckInstalled()
                                 {
                                     Id = match.Groups["Id"].Value,
                                     Ver = match.Groups["Ver"].Value,
@@ -131,7 +142,7 @@ namespace BoysheO.Nuget.Editor
 
             if (PlayerSettings.assemblyVersionValidation)
             {
-                Debug.Log("AssemblyVersionValidation detected.script has already set it false for nuget.");
+                Debug.Log("AssemblyVersionValidation detected.Script has already set it false.\nAssemblyVersionValidation is useless in Unity and crash usually( most of packages from nuget),about AssemblyVersionValidation you can learn more from google.com.");
                 PlayerSettings.assemblyVersionValidation = false;
             }
 
@@ -176,7 +187,8 @@ namespace BoysheO.Nuget.Editor
                 if (folderReadyToCopy is null)
                 {
                     Debug.LogError(
-                        $"[{slnPck.Id}.{slnPck.Ver}]Unable to find the appropriate Net version to use in Unity!");
+                        string.Format("[{0}.{1}]Unable to find the appropriate net version to use in Unity!", slnPck.Id,
+                            slnPck.Ver));
                     continue;
                 }
 
@@ -184,9 +196,10 @@ namespace BoysheO.Nuget.Editor
                 {
                     var fileName = Path.GetFileName(files);
                     var destFolder = PackagesInstallationFolder +
-                                     $"/{folderReadyToCopy.Id}.{folderReadyToCopy.Ver}/lib/{folderReadyToCopy.NetVer}";
+                                     string.Format("/{0}.{1}/lib/{2}", folderReadyToCopy.Id, folderReadyToCopy.Ver,
+                                         folderReadyToCopy.NetVer);
                     if (!Directory.Exists(destFolder)) Directory.CreateDirectory(destFolder);
-                    var destFile = $"{destFolder}/{fileName}";
+                    var destFile = string.Format("{0}/{1}", destFolder, fileName);
                     // Debug.Log($"copy {files} to {destFile}");
                     File.Copy(files, destFile, true);
                 }
