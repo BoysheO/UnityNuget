@@ -57,6 +57,7 @@ namespace BoysheO.Nuget.Editor
             "netstandard1.0",
             "netstandard2.1",
             "netstandard2.1",
+            "net40",
         };
 
         private static string PackagesInstallationFolder => Application.dataPath + "/Plugins/Nuget/";
