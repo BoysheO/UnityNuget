@@ -141,13 +141,15 @@ namespace BoysheO.Nuget.Editor
             Debug.Log("Nuget Restoring...");
 
             #region 检查是否打开了强制程序集版本
-
+            
+#if UNITY_2019_5_OR_NEWER
             if (PlayerSettings.assemblyVersionValidation)
             {
                 Debug.Log(
                     "AssemblyVersionValidation detected.Script has already set it false.\nAssemblyVersionValidation is useless in Unity and crash usually( most of packages from nuget),about AssemblyVersionValidation you can learn more from google.com.");
                 PlayerSettings.assemblyVersionValidation = false;
             }
+#endif
 
             #endregion
 
