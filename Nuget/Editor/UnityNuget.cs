@@ -71,7 +71,8 @@ namespace BoysheO.Nuget.Editor
 
         private static IEnumerable<PckInf> AsPackageInfoEnumerable(this XDocument xmlDoc)
         {
-            return xmlDoc.Root!.Elements()
+            // ReSharper disable once PossibleNullReferenceException
+            return xmlDoc.Root.Elements()
                 .Select(e => new PckInf()
                 {
                     Id = e.Attribute("id").Value,
